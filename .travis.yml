@@ -3,12 +3,26 @@ cache: bundler
 rvm: 2.4.0
 bundler_args: --without production
 
+env:
+  global:
+    - CC_TEST_REPORTER_ID=22027dd6b2efb2c2f94a668d2be6e3631084dfc89c3fda224304f34edf35e40d
+    - CCTR=/tmp/cc-test-reporter
+
 before_install:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > $CCTR
+  - chmod +x $CCTR
+  - $CCTR before-build
   - cd rottenpotatoes
   - gem install bundler:1.17.3
 
 script:
   - bundle exec rake db:migrate
   - bundle exec rake db:test:prepare
-  - bundle exec rspec
-  - bundle exec cucumber
+  - bundle exec rake spec
+  - $CCTR format-coverage -t simplecov --output coverage/codeclimate.$SUITE.json
+  - bundle exec rake cucumber
+  - $CCTR format-coverage -t simplecov --output coverage/codeclimate.$SUITE.json
+
+after_script:
+  - $CCTR sum-coverage coverage/codeclimate.*.json | $CCTR upload-coverage
+  - $CCTR after-build --exit-code $TRAVIS_TEST_RESULT
