@@ -61,4 +61,18 @@ class MoviesController < ApplicationController
     redirect_to movies_path
   end
 
+  def search_director
+    viewed_movie = Movie.find(params[:id])
+    if viewed_movie.blank?
+      render plain: "No movie with id: #{params[:id]} exists"
+    end
+
+    if viewed_movie.director.blank?
+      flash[:notice] = "\'#{viewed_movie.title}\' has no director info"
+      redirect_to movies_path and return
+    end
+
+    @movies = Movie.where(director: viewed_movie.director)
+  end
+
 end

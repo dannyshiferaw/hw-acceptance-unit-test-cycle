@@ -23,3 +23,8 @@ Then /I should see all the movies/ do
     step %{I should see "#{movie.title}"}
   end
 end
+
+When /^the director of "([^"]*)" should be "([^"]*)"$/ do |title, director|
+  movie = Movie.find_by(title: title)
+  expect(movie).to have_attributes(director: director)
+end
