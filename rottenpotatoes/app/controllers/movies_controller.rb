@@ -62,9 +62,11 @@ class MoviesController < ApplicationController
   end
 
   def search_director
-    viewed_movie = Movie.find(params[:id])
-    if viewed_movie.blank?
-      render plain: "No movie with id: #{params[:id]} exists"
+    begin
+      viewed_movie = Movie.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      flash[:notice] = "No movie with id: #{params[:id]} exists"
+      render :no_movies and return
     end
 
     if viewed_movie.director.blank?
